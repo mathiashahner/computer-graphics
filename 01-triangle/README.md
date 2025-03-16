@@ -13,3 +13,7 @@ Access in your browser:
 ```
 http://localhost:5173/
 ```
+
+Screenshot of application running:
+
+![](result.png)
