@@ -11,7 +11,6 @@ const vertexShaderSource = `#version 300 es
   void main() {
     gl_Position = model * vec4(position, 1.0);
     finalColor = vec4(color, 1.0);
-    gl_PointSize = 10.0;
   }
 `;
 
@@ -25,9 +24,10 @@ const fragmentShaderSource = `#version 300 es
   }
 `;
 
-let rotateX = false;
-let rotateY = false;
-let rotateZ = false;
+let angleX = 0;
+let angleY = 0;
+let angleZ = 0;
+let scale = 1;
 
 function setupProgram(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -58,28 +58,33 @@ function setupProgram(gl) {
 function setupVertices(gl) {
   const vertices = new Float32Array([
     // Front
-    -0.5, 0.5, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-    0.5, -0.5, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
+    -0.5, 0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
+    0.5, -0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
 
     // Back
-    -0.5, 0.5, -0.5, 0.0, 1.0, 0.0, -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
-    0.5, -0.5, -0.5, 0.0, 1.0, 0.0, -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
+    -0.5, 0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0, 0.25,
+    0.0, 0.5, -0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0,
+    0.25, 0.0,
 
     // Left
-    -0.5, 0.5, -0.5, 0.0, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 0.0, 1.0, -0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-    -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 0.0, 1.0, -0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
+    -0.5, 0.5, -0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0, 0.0,
+    0.25, -0.5, -0.5, 0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0,
+    0.0, 0.25,
 
     // Right
-    0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 0.5, -0.5, -0.5, 1.0, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 0.0,
-    0.5, -0.5, 0.5, 1.0, 1.0, 0.0, 0.5, -0.5, -0.5, 1.0, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 0.0,
+    0.5, 0.5, -0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25, 0.25,
+    0.0, 0.5, -0.5, 0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25,
+    0.25, 0.0,
 
     // Top
-    -0.5, 0.5, 0.5, 0.0, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
-    0.5, 0.5, -0.5, 0.0, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
+    -0.5, 0.5, 0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0, 0.25,
+    0.25, 0.5, 0.5, -0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0,
+    0.25, 0.25,
 
     // Bottom
-    -0.5, -0.5, 0.5, 1.0, 0.0, 1.0, -0.5, -0.5, -0.5, 1.0, 0.0, 1.0, 0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
-    0.5, -0.5, -0.5, 1.0, 0.0, 1.0, -0.5, -0.5, -0.5, 1.0, 0.0, 1.0, 0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
+    -0.5, -0.5, 0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25, 0.0,
+    0.25, 0.5, -0.5, -0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25,
+    0.0, 0.25,
   ]);
 
   const vao = gl.createVertexArray();
@@ -105,9 +110,29 @@ function setupVertices(gl) {
 
 function setupKeyCallback() {
   document.addEventListener("keydown", (event) => {
-    if (event.key === "x" || event.key === "X") rotateX = !rotateX;
-    if (event.key === "y" || event.key === "Y") rotateY = !rotateY;
-    if (event.key === "z" || event.key === "Z") rotateZ = !rotateZ;
+    if (event.key === "d" || event.key === "D") angleX += 0.05;
+    if (event.key === "a" || event.key === "A") angleX -= 0.05;
+
+    if (event.key === "c" || event.key === "C") angleY += 0.05;
+    if (event.key === "z" || event.key === "Z") angleY -= 0.05;
+
+    if (event.key === "w" || event.key === "W") angleZ += 0.05;
+    if (event.key === "s" || event.key === "S") angleZ -= 0.05;
+
+    if ((event.key === "q" || event.key === "Q") && scale > 0.05) scale -= 0.05;
+    if ((event.key === "e" || event.key === "E") && scale < 2) scale += 0.05;
+
+    if (event.key === "r" || event.key === "R") {
+      angleX = 0;
+      angleY = 0;
+      angleZ = 0;
+      scale = 1;
+    }
+
+    document.getElementById("control-value-x").innerText = angleX.toFixed(2);
+    document.getElementById("control-value-y").innerText = angleY.toFixed(2);
+    document.getElementById("control-value-z").innerText = angleZ.toFixed(2);
+    document.getElementById("control-value-scale").innerText = scale.toFixed(2);
   });
 }
 
@@ -127,16 +152,15 @@ function main() {
   gl.uniformMatrix4fv(modelLocation, false, model);
 
   function render() {
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(0.175, 0.175, 0.175, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
-    let angle = performance.now() / 1000;
-
     mat4.identity(model);
-    if (rotateX) mat4.rotateX(model, model, angle);
-    if (rotateY) mat4.rotateY(model, model, angle);
-    if (rotateZ) mat4.rotateZ(model, model, angle);
+    mat4.rotateX(model, model, angleX);
+    mat4.rotateY(model, model, angleY);
+    mat4.rotateZ(model, model, angleZ);
+    mat4.scale(model, model, [scale, scale, scale]);
 
     gl.uniformMatrix4fv(modelLocation, false, model);
 

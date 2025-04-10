@@ -7,7 +7,56 @@
     <title>Hello 3D - Mathias</title>
   </head>
   <body>
-    <canvas id="canvas" width="900" height="900"></canvas>
+    <div class="menu">
+      <h1>controls</h1>
+
+      <div class="control">
+        <h2 class="control-title">rotate x</h2>
+        <div class="control-keys">
+          <div class="control-key">a</div>
+          <span id="control-value-x">0.00</span>
+          <div class="control-key">d</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">rotate y</h2>
+        <div class="control-keys">
+          <div class="control-key">z</div>
+          <span id="control-value-y">0.00</span>
+          <div class="control-key">c</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">rotate z</h2>
+        <div class="control-keys">
+          <div class="control-key">s</div>
+          <span id="control-value-z">0.00</span>
+          <div class="control-key">w</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">scale</h2>
+        <div class="control-keys">
+          <div class="control-key">q</div>
+          <span id="control-value-scale">1.00</span>
+          <div class="control-key">e</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">reset</h2>
+        <div class="control-keys">
+          <div class="control-key">r</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="canvas" width="900" height="900"></canvas>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
