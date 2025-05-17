@@ -55,7 +55,8 @@ body {
 #control-value-x,
 #control-value-y,
 #control-value-z,
-#control-value-scale {
+#control-value-scale,
+#control-value-instances {
   text-align: center;
   width: 60px;
 }

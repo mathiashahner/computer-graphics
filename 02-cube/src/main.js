@@ -28,6 +28,7 @@ let angleX = 0;
 let angleY = 0;
 let angleZ = 0;
 let scale = 1;
+let numCubes = 1;
 
 function setupProgram(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -122,17 +123,22 @@ function setupKeyCallback() {
     if ((event.key === "q" || event.key === "Q") && scale > 0.05) scale -= 0.05;
     if ((event.key === "e" || event.key === "E") && scale < 2) scale += 0.05;
 
+    if ((event.key === "f" || event.key === "F") && numCubes > 1) numCubes -= 1;
+    if ((event.key === "g" || event.key === "G") && numCubes < 9) numCubes += 1;
+
     if (event.key === "r" || event.key === "R") {
       angleX = 0;
       angleY = 0;
       angleZ = 0;
       scale = 1;
+      numCubes = 1;
     }
 
     document.getElementById("control-value-x").innerText = angleX.toFixed(2);
     document.getElementById("control-value-y").innerText = angleY.toFixed(2);
     document.getElementById("control-value-z").innerText = angleZ.toFixed(2);
     document.getElementById("control-value-scale").innerText = scale.toFixed(2);
+    document.getElementById("control-value-instances").innerText = numCubes;
   });
 }
 
@@ -156,17 +162,34 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
-    mat4.identity(model);
-    mat4.rotateX(model, model, angleX);
-    mat4.rotateY(model, model, angleY);
-    mat4.rotateZ(model, model, angleZ);
-    mat4.scale(model, model, [scale, scale, scale]);
-
-    gl.uniformMatrix4fv(modelLocation, false, model);
-
     gl.bindVertexArray(vao);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
-    gl.drawArrays(gl.POINTS, 0, 36);
+
+    const maxPerRow = 3;
+    const spacing = 1.5 * scale;
+    const rows = Math.ceil(numCubes / maxPerRow);
+
+    for (let i = 0; i < numCubes; i++) {
+      const row = Math.floor(i / maxPerRow);
+      const col = i % maxPerRow;
+
+      const cubesInThisRow =
+        row === rows - 1 && numCubes % maxPerRow !== 0 ? numCubes % maxPerRow : maxPerRow;
+
+      const offsetX = (col - (cubesInThisRow - 1) / 2) * spacing;
+      const offsetY = ((rows - 1) / 2 - row) * spacing;
+
+      mat4.identity(model);
+      mat4.translate(model, model, [offsetX, offsetY, 0]);
+      mat4.rotateX(model, model, angleX);
+      mat4.rotateY(model, model, angleY);
+      mat4.rotateZ(model, model, angleZ);
+      mat4.scale(model, model, [scale, scale, scale]);
+
+      gl.uniformMatrix4fv(modelLocation, false, model);
+      gl.drawArrays(gl.TRIANGLES, 0, 36);
+      gl.drawArrays(gl.POINTS, 0, 36);
+    }
+
     gl.bindVertexArray(null);
 
     requestAnimationFrame(render);
