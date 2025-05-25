@@ -14,6 +14,6 @@ Access in your browser:
 http://localhost:5173/
 ```
 
-Screenshot of application running:
+Video of application running:
 
-![](result.png)
+![](result.gif)

@@ -24,11 +24,17 @@ const fragmentShaderSource = `#version 300 es
   }
 `;
 
-let angleX = 0;
-let angleY = 0;
-let angleZ = 0;
-let scale = 1;
-let numCubes = 1;
+const defaultCube = {
+  position: [0, 0, 0],
+  rotation: [0, 0, 0],
+  rotateX: false,
+  rotateY: false,
+  rotateZ: false,
+  scale: 1,
+};
+
+let selectedCube = 0;
+let cubes = [structuredClone(defaultCube)];
 
 function setupProgram(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -109,37 +115,98 @@ function setupVertices(gl) {
   return vao;
 }
 
+function resetHandler(key) {
+  if (key === "r") {
+    cubes = [structuredClone(defaultCube)];
+    selectedCube = 0;
+  }
+}
+
+function changeSelectedCubeHandler(key) {
+  if (key.match(/^[0-9]$/)) {
+    const num = parseInt(key, 10);
+    if (num > 0 && num <= cubes.length) selectedCube = num - 1;
+  }
+}
+
+function changeRotationHandler(key) {
+  let cube = cubes[selectedCube];
+
+  if (key === "x") cube.rotateX = !cube.rotateX;
+  if (key === "y") cube.rotateY = !cube.rotateY;
+  if (key === "z") cube.rotateZ = !cube.rotateZ;
+}
+
+function changePositionHandler(key) {
+  let position = cubes[selectedCube].position;
+
+  if (key === "d") position[0] += 0.05;
+  if (key === "a") position[0] -= 0.05;
+
+  if (key === "w") position[1] += 0.05;
+  if (key === "s") position[1] -= 0.05;
+
+  if (key === "e") position[2] += 0.05;
+  if (key === "q") position[2] -= 0.05;
+}
+
+function changeScaleHandler(key) {
+  let cube = cubes[selectedCube];
+
+  if (key === "[") cube.scale = Math.max(cube.scale - 0.05, 0.05);
+  if (key === "]") cube.scale = Math.min(cube.scale + 0.05, 2);
+}
+
+function changeCubeCountHandler(key) {
+  if (key === "arrowdown" && cubes.length > 1) {
+    cubes.pop();
+    selectedCube = Math.max(selectedCube - 1, 0);
+  }
+
+  if (key === "arrowup" && cubes.length < 9) {
+    cubes.push(structuredClone(defaultCube));
+  }
+}
+
 function setupKeyCallback() {
   document.addEventListener("keydown", (event) => {
-    if (event.key === "d" || event.key === "D") angleX += 0.05;
-    if (event.key === "a" || event.key === "A") angleX -= 0.05;
+    const key = event.key.toLowerCase();
 
-    if (event.key === "c" || event.key === "C") angleY += 0.05;
-    if (event.key === "z" || event.key === "Z") angleY -= 0.05;
+    resetHandler(key);
+    changeSelectedCubeHandler(key);
+    changeRotationHandler(key);
+    changePositionHandler(key);
+    changeScaleHandler(key);
+    changeCubeCountHandler(key);
 
-    if (event.key === "w" || event.key === "W") angleZ += 0.05;
-    if (event.key === "s" || event.key === "S") angleZ -= 0.05;
+    const cube = cubes[selectedCube];
 
-    if ((event.key === "q" || event.key === "Q") && scale > 0.05) scale -= 0.05;
-    if ((event.key === "e" || event.key === "E") && scale < 2) scale += 0.05;
-
-    if ((event.key === "f" || event.key === "F") && numCubes > 1) numCubes -= 1;
-    if ((event.key === "g" || event.key === "G") && numCubes < 9) numCubes += 1;
-
-    if (event.key === "r" || event.key === "R") {
-      angleX = 0;
-      angleY = 0;
-      angleZ = 0;
-      scale = 1;
-      numCubes = 1;
-    }
-
-    document.getElementById("control-value-x").innerText = angleX.toFixed(2);
-    document.getElementById("control-value-y").innerText = angleY.toFixed(2);
-    document.getElementById("control-value-z").innerText = angleZ.toFixed(2);
-    document.getElementById("control-value-scale").innerText = scale.toFixed(2);
-    document.getElementById("control-value-instances").innerText = numCubes;
+    document.getElementById("control-value-x").innerText = cube.position[0].toFixed(2);
+    document.getElementById("control-value-y").innerText = cube.position[1].toFixed(2);
+    document.getElementById("control-value-z").innerText = cube.position[2].toFixed(2);
+    document.getElementById("control-value-scale").innerText = cube.scale.toFixed(2);
+    document.getElementById("control-value-instances").innerText = cubes.length;
+    document.getElementById("control-value-selected").innerText = selectedCube + 1;
   });
+}
+
+function resizeCanvas(canvas) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const dpr = window.devicePixelRatio;
+
+  const size = Math.min(width, height);
+
+  const displayWidth = Math.round(size * dpr);
+  const displayHeight = Math.round(size * dpr);
+
+  const needResize = canvas.width != displayWidth || canvas.height != displayHeight;
+
+  if (needResize) {
+    console.log(`Canvas size: ${size}px`, displayWidth, displayHeight);
+    canvas.width = displayWidth;
+    canvas.height = displayHeight;
+  }
 }
 
 function main() {
@@ -158,31 +225,32 @@ function main() {
   gl.uniformMatrix4fv(modelLocation, false, model);
 
   function render() {
+    resizeCanvas(gl.canvas);
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(0.175, 0.175, 0.175, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
     gl.bindVertexArray(vao);
 
-    const maxPerRow = 3;
-    const spacing = 1.5 * scale;
-    const rows = Math.ceil(numCubes / maxPerRow);
-
-    for (let i = 0; i < numCubes; i++) {
-      const row = Math.floor(i / maxPerRow);
-      const col = i % maxPerRow;
-
-      const cubesInThisRow =
-        row === rows - 1 && numCubes % maxPerRow !== 0 ? numCubes % maxPerRow : maxPerRow;
-
-      const offsetX = (col - (cubesInThisRow - 1) / 2) * spacing;
-      const offsetY = ((rows - 1) / 2 - row) * spacing;
+    for (let i = 0; i < cubes.length; i++) {
+      const { position, rotateX, rotateY, rotateZ, scale } = cubes[i];
+      const angle = performance.now() / 1000;
+      let rotation = cubes[i].rotation;
 
       mat4.identity(model);
-      mat4.translate(model, model, [offsetX, offsetY, 0]);
-      mat4.rotateX(model, model, angleX);
-      mat4.rotateY(model, model, angleY);
-      mat4.rotateZ(model, model, angleZ);
+      mat4.translate(model, model, position);
+
+      if (rotateX) rotation[0] = angle;
+      mat4.rotateX(model, model, rotation[0]);
+
+      if (rotateY) rotation[1] = angle;
+      mat4.rotateY(model, model, rotation[1]);
+
+      if (rotateZ) rotation[2] = angle;
+      mat4.rotateZ(model, model, rotation[2]);
+
       mat4.scale(model, model, [scale, scale, scale]);
 
       gl.uniformMatrix4fv(modelLocation, false, model);
