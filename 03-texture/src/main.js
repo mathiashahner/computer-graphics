@@ -1,144 +1,36 @@
 import "./style.css";
 
 import { mat4 } from "gl-matrix";
+import { setupProgram, setupVertices } from "./setup";
+import { getDefaultObject, resizeCanvas } from "./utils";
 
-const vertexShaderSource = `#version 300 es
-  in vec3 position;
-  in vec3 color;
-  uniform mat4 model;
-  out vec4 finalColor;
-
-  void main() {
-    gl_Position = model * vec4(position, 1.0);
-    finalColor = vec4(color, 1.0);
-  }
-`;
-
-const fragmentShaderSource = `#version 300 es
-  precision mediump float;
-  in vec4 finalColor;
-  out vec4 color;
-  
-  void main() {
-    color = finalColor;
-  }
-`;
-
-const defaultCube = {
-  position: [0, 0, 0],
-  rotation: [0, 0, 0],
-  rotateX: false,
-  rotateY: false,
-  rotateZ: false,
-  scale: 1,
-};
-
-let selectedCube = 0;
-let cubes = [structuredClone(defaultCube)];
-
-function setupProgram(gl) {
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vertexShaderSource);
-  gl.compileShader(vertexShader);
-
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragmentShader, fragmentShaderSource);
-  gl.compileShader(fragmentShader);
-
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getShaderInfoLog(vertexShader));
-    console.error(gl.getShaderInfoLog(fragmentShader));
-    console.error(gl.getProgramInfoLog(program));
-  }
-
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-
-  return program;
-}
-
-function setupVertices(gl) {
-  const vertices = new Float32Array([
-    // Front
-    -0.5, 0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
-    0.5, -0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
-
-    // Back
-    -0.5, 0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0, 0.25,
-    0.0, 0.5, -0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0,
-    0.25, 0.0,
-
-    // Left
-    -0.5, 0.5, -0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0, 0.0,
-    0.25, -0.5, -0.5, 0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0,
-    0.0, 0.25,
-
-    // Right
-    0.5, 0.5, -0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25, 0.25,
-    0.0, 0.5, -0.5, 0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25,
-    0.25, 0.0,
-
-    // Top
-    -0.5, 0.5, 0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0, 0.25,
-    0.25, 0.5, 0.5, -0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0,
-    0.25, 0.25,
-
-    // Bottom
-    -0.5, -0.5, 0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25, 0.0,
-    0.25, 0.5, -0.5, -0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25,
-    0.0, 0.25,
-  ]);
-
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
-
-  const vbo = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-  const stride = 6 * Float32Array.BYTES_PER_ELEMENT;
-
-  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
-  gl.enableVertexAttribArray(0);
-
-  gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
-  gl.enableVertexAttribArray(1);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  gl.bindVertexArray(null);
-
-  return vao;
-}
+let selectedObject = 0;
+let objects = [getDefaultObject()];
 
 function resetHandler(key) {
   if (key === "r") {
-    cubes = [structuredClone(defaultCube)];
-    selectedCube = 0;
+    objects = [getDefaultObject()];
+    selectedObject = 0;
   }
 }
 
-function changeSelectedCubeHandler(key) {
+function changeSelectedHandler(key) {
   if (key.match(/^[0-9]$/)) {
     const num = parseInt(key, 10);
-    if (num > 0 && num <= cubes.length) selectedCube = num - 1;
+    if (num > 0 && num <= objects.length) selectedObject = num - 1;
   }
 }
 
 function changeRotationHandler(key) {
-  let cube = cubes[selectedCube];
+  let object = objects[selectedObject];
 
-  if (key === "x") cube.rotateX = !cube.rotateX;
-  if (key === "y") cube.rotateY = !cube.rotateY;
-  if (key === "z") cube.rotateZ = !cube.rotateZ;
+  if (key === "x") object.rotateX = !object.rotateX;
+  if (key === "y") object.rotateY = !object.rotateY;
+  if (key === "z") object.rotateZ = !object.rotateZ;
 }
 
 function changePositionHandler(key) {
-  let position = cubes[selectedCube].position;
+  let position = objects[selectedObject].position;
 
   if (key === "d") position[0] += 0.05;
   if (key === "a") position[0] -= 0.05;
@@ -151,20 +43,20 @@ function changePositionHandler(key) {
 }
 
 function changeScaleHandler(key) {
-  let cube = cubes[selectedCube];
+  let object = objects[selectedObject];
 
-  if (key === "[") cube.scale = Math.max(cube.scale - 0.05, 0.05);
-  if (key === "]") cube.scale = Math.min(cube.scale + 0.05, 2);
+  if (key === "[") object.scale = Math.max(object.scale - 0.05, 0.05);
+  if (key === "]") object.scale = Math.min(object.scale + 0.05, 2);
 }
 
-function changeCubeCountHandler(key) {
-  if (key === "arrowdown" && cubes.length > 1) {
-    cubes.pop();
-    selectedCube = Math.max(selectedCube - 1, 0);
+function changeCountHandler(key) {
+  if (key === "arrowdown" && objects.length > 1) {
+    objects.pop();
+    selectedObject = Math.max(selectedObject - 1, 0);
   }
 
-  if (key === "arrowup" && cubes.length < 9) {
-    cubes.push(structuredClone(defaultCube));
+  if (key === "arrowup" && objects.length < 9) {
+    objects.push(getDefaultObject());
   }
 }
 
@@ -173,40 +65,21 @@ function setupKeyCallback() {
     const key = event.key.toLowerCase();
 
     resetHandler(key);
-    changeSelectedCubeHandler(key);
+    changeSelectedHandler(key);
     changeRotationHandler(key);
     changePositionHandler(key);
     changeScaleHandler(key);
-    changeCubeCountHandler(key);
+    changeCountHandler(key);
 
-    const cube = cubes[selectedCube];
+    const object = objects[selectedObject];
 
-    document.getElementById("control-value-x").innerText = cube.position[0].toFixed(2);
-    document.getElementById("control-value-y").innerText = cube.position[1].toFixed(2);
-    document.getElementById("control-value-z").innerText = cube.position[2].toFixed(2);
-    document.getElementById("control-value-scale").innerText = cube.scale.toFixed(2);
-    document.getElementById("control-value-instances").innerText = cubes.length;
-    document.getElementById("control-value-selected").innerText = selectedCube + 1;
+    document.getElementById("control-value-x").innerText = object.position[0].toFixed(2);
+    document.getElementById("control-value-y").innerText = object.position[1].toFixed(2);
+    document.getElementById("control-value-z").innerText = object.position[2].toFixed(2);
+    document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
+    document.getElementById("control-value-instances").innerText = objects.length;
+    document.getElementById("control-value-selected").innerText = selectedObject + 1;
   });
-}
-
-function resizeCanvas(canvas) {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const dpr = window.devicePixelRatio;
-
-  const size = Math.min(width, height);
-
-  const displayWidth = Math.round(size * dpr);
-  const displayHeight = Math.round(size * dpr);
-
-  const needResize = canvas.width != displayWidth || canvas.height != displayHeight;
-
-  if (needResize) {
-    console.log(`Canvas size: ${size}px`, displayWidth, displayHeight);
-    canvas.width = displayWidth;
-    canvas.height = displayHeight;
-  }
 }
 
 function main() {
@@ -234,10 +107,10 @@ function main() {
 
     gl.bindVertexArray(vao);
 
-    for (let i = 0; i < cubes.length; i++) {
-      const { position, rotateX, rotateY, rotateZ, scale } = cubes[i];
+    for (let i = 0; i < objects.length; i++) {
+      const { position, rotateX, rotateY, rotateZ, scale } = objects[i];
       const angle = performance.now() / 1000;
-      let rotation = cubes[i].rotation;
+      let rotation = objects[i].rotation;
 
       mat4.identity(model);
       mat4.translate(model, model, position);
@@ -255,7 +128,6 @@ function main() {
 
       gl.uniformMatrix4fv(modelLocation, false, model);
       gl.drawArrays(gl.TRIANGLES, 0, 36);
-      gl.drawArrays(gl.POINTS, 0, 36);
     }
 
     gl.bindVertexArray(null);
@@ -263,7 +135,7 @@ function main() {
     requestAnimationFrame(render);
   }
 
-  render();
+  requestAnimationFrame(render);
 }
 
 main();
