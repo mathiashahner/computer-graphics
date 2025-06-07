@@ -3,6 +3,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
@@ -16,14 +17,31 @@ body {
 }
 
 .menu {
+  gap: 20px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
   font-size: 16px;
   background-color: #222222;
   height: 100%;
   width: 20%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #444444 #222222;
+}
+
+.menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: #444444;
+  border-radius: 4px;
+}
+
+.menu::-webkit-scrollbar-track {
+  background: #222222;
 }
 
 .line {
@@ -49,15 +67,16 @@ body {
 }
 
 .control-key {
+  background-color: #2d2d2d;
   border: 2px solid #444444;
   border-radius: 5px;
-  background-color: #2d2d2d;
   padding: 5px;
   width: 20px;
   height: 20px;
   line-height: 20px;
   text-align: center;
   font-weight: bold;
+  box-sizing: content-box;
 }
 
 .control-keys span {
