@@ -12,19 +12,17 @@ export function getDefaultObject() {
 }
 
 export function resizeCanvas(canvas) {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  const container = canvas.parentElement;
+  const containerRect = container.getBoundingClientRect();
   const dpr = window.devicePixelRatio;
 
-  const size = Math.min(width, height);
-
-  const displayWidth = Math.round(size * dpr);
-  const displayHeight = Math.round(size * dpr);
+  const displayWidth = Math.round(containerRect.width * dpr);
+  const displayHeight = Math.round(containerRect.height * dpr);
 
   const needResize = canvas.width != displayWidth || canvas.height != displayHeight;
 
   if (needResize) {
-    console.log(`Canvas size: ${size}px`, displayWidth, displayHeight);
+    console.log(`Canvas size: ${displayWidth}x${displayHeight}px`);
     canvas.width = displayWidth;
     canvas.height = displayHeight;
   }

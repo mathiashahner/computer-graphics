@@ -92,14 +92,25 @@ async function main() {
   setupKeyCallback();
 
   const modelLocation = gl.getUniformLocation(program, "model");
-  const model = mat4.create();
+  const viewLocation = gl.getUniformLocation(program, "view");
+  const projectionLocation = gl.getUniformLocation(program, "projection");
 
-  gl.uniformMatrix4fv(modelLocation, false, model);
+  const model = mat4.create();
+  const view = mat4.create();
+  const projection = mat4.create();
+
+  mat4.lookAt(view, [0, 0, 3], [0, 0, 0], [0, 1, 0]);
+  gl.uniformMatrix4fv(viewLocation, false, view);
 
   function render() {
     resizeCanvas(gl.canvas);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    const aspect = gl.canvas.width / gl.canvas.height;
+    mat4.perspective(projection, Math.PI / 4, aspect, 0.1, 100.0);
+    gl.uniformMatrix4fv(projectionLocation, false, projection);
+
     gl.clearColor(0.175, 0.175, 0.175, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
