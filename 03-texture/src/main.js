@@ -82,15 +82,14 @@ function setupKeyCallback() {
   });
 }
 
-function main() {
+async function main() {
   const canvas = document.getElementById("canvas");
   const gl = canvas.getContext("webgl2");
 
   const program = setupProgram(gl);
-  const vao = setupVertices(gl);
-  setupKeyCallback();
+  const object = await setupVertices(gl, "/model.obj");
 
-  gl.useProgram(program);
+  setupKeyCallback();
 
   const modelLocation = gl.getUniformLocation(program, "model");
   const model = mat4.create();
@@ -105,7 +104,7 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
-    gl.bindVertexArray(vao);
+    gl.bindVertexArray(object.vao);
 
     for (let i = 0; i < objects.length; i++) {
       const { position, rotateX, rotateY, rotateZ, scale } = objects[i];
@@ -127,7 +126,7 @@ function main() {
       mat4.scale(model, model, [scale, scale, scale]);
 
       gl.uniformMatrix4fv(modelLocation, false, model);
-      gl.drawArrays(gl.TRIANGLES, 0, 36);
+      gl.drawArrays(gl.TRIANGLES, 0, object.vertexCount);
     }
 
     gl.bindVertexArray(null);

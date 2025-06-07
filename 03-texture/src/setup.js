@@ -1,4 +1,5 @@
 import { fragmentShaderSource, vertexShaderSource } from "./shader";
+import { createVertexData, getVertexCount, loadObject } from "./load-object";
 
 export function setupProgram(gl) {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -23,58 +24,39 @@ export function setupProgram(gl) {
   gl.deleteShader(vertexShader);
   gl.deleteShader(fragmentShader);
 
+  gl.useProgram(program);
+
   return program;
 }
 
-export function setupVertices(gl) {
-  const vertices = new Float32Array([
-    // Front
-    -0.5, 0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
-    0.5, -0.5, 0.5, 0.25, 0.0, 0.0, -0.5, -0.5, 0.5, 0.25, 0.0, 0.0, 0.5, 0.5, 0.5, 0.25, 0.0, 0.0,
+export async function setupVertices(gl, objUrl = "/cube.obj") {
+  try {
+    const objData = await loadObject(objUrl);
+    console.log("Object file loaded:", objData);
 
-    // Back
-    -0.5, 0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0, 0.25,
-    0.0, 0.5, -0.5, -0.5, 0.0, 0.25, 0.0, -0.5, -0.5, -0.5, 0.0, 0.25, 0.0, 0.5, 0.5, -0.5, 0.0,
-    0.25, 0.0,
+    const vertices = createVertexData(objData);
+    const vertexCount = getVertexCount(objData);
 
-    // Left
-    -0.5, 0.5, -0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0, 0.0,
-    0.25, -0.5, -0.5, 0.5, 0.0, 0.0, 0.25, -0.5, -0.5, -0.5, 0.0, 0.0, 0.25, -0.5, 0.5, 0.5, 0.0,
-    0.0, 0.25,
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
 
-    // Right
-    0.5, 0.5, -0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25, 0.25,
-    0.0, 0.5, -0.5, 0.5, 0.25, 0.25, 0.0, 0.5, -0.5, -0.5, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.25,
-    0.25, 0.0,
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    // Top
-    -0.5, 0.5, 0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0, 0.25,
-    0.25, 0.5, 0.5, -0.5, 0.0, 0.25, 0.25, -0.5, 0.5, -0.5, 0.0, 0.25, 0.25, 0.5, 0.5, 0.5, 0.0,
-    0.25, 0.25,
+    const stride = 6 * Float32Array.BYTES_PER_ELEMENT;
 
-    // Bottom
-    -0.5, -0.5, 0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25, 0.0,
-    0.25, 0.5, -0.5, -0.5, 0.25, 0.0, 0.25, -0.5, -0.5, -0.5, 0.25, 0.0, 0.25, 0.5, -0.5, 0.5, 0.25,
-    0.0, 0.25,
-  ]);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
+    gl.enableVertexAttribArray(0);
 
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.enableVertexAttribArray(1);
 
-  const vbo = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindVertexArray(null);
 
-  const stride = 6 * Float32Array.BYTES_PER_ELEMENT;
-
-  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
-  gl.enableVertexAttribArray(0);
-
-  gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
-  gl.enableVertexAttribArray(1);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  gl.bindVertexArray(null);
-
-  return vao;
+    return { vao, vertexCount };
+  } catch (error) {
+    console.error("Error on vertex setup:", error);
+  }
 }
