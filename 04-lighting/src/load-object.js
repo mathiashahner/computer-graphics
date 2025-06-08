@@ -61,7 +61,7 @@ function parseObject(objectText) {
 
 export function createVertexData(objectData) {
   const vertexData = [];
-  const { faces, vertices, textureCoords } = objectData;
+  const { faces, vertices, textureCoords, normals } = objectData;
 
   for (const face of faces) {
     for (const faceVertex of face) {
@@ -70,6 +70,9 @@ export function createVertexData(objectData) {
 
       const texCoord = textureCoords[faceVertex.texture];
       vertexData.push(texCoord[0], texCoord[1]);
+
+      const normal = normals[faceVertex.normal];
+      vertexData.push(...normal);
     }
   }
 

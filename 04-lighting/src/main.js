@@ -95,14 +95,39 @@ async function main() {
   const modelLocation = gl.getUniformLocation(program, "model");
   const viewLocation = gl.getUniformLocation(program, "view");
   const projectionLocation = gl.getUniformLocation(program, "projection");
+  const normalMatrixLocation = gl.getUniformLocation(program, "normalMatrix");
   const textureLocation = gl.getUniformLocation(program, "uTexture");
+
+  const materialAmbientLocation = gl.getUniformLocation(program, "uMaterialAmbient");
+  const materialDiffuseLocation = gl.getUniformLocation(program, "uMaterialDiffuse");
+  const materialSpecularLocation = gl.getUniformLocation(program, "uMaterialSpecular");
+  const materialShininessLocation = gl.getUniformLocation(program, "uMaterialShininess");
+
+  const lightPositionLocation = gl.getUniformLocation(program, "uLightPosition");
+  const lightAmbientLocation = gl.getUniformLocation(program, "uLightAmbient");
+  const lightDiffuseLocation = gl.getUniformLocation(program, "uLightDiffuse");
+  const lightSpecularLocation = gl.getUniformLocation(program, "uLightSpecular");
+
+  const viewPositionLocation = gl.getUniformLocation(program, "uViewPosition");
 
   const model = mat4.create();
   const view = mat4.create();
   const projection = mat4.create();
+  const normalMatrix = mat4.create();
 
   mat4.lookAt(view, [0, 0, 3], [0, 0, 0], [0, 1, 0]);
   gl.uniformMatrix4fv(viewLocation, false, view);
+  gl.uniform3fv(viewPositionLocation, [0, 0, 3]);
+
+  gl.uniform3fv(materialAmbientLocation, texture.material.ambient);
+  gl.uniform3fv(materialDiffuseLocation, texture.material.diffuse);
+  gl.uniform3fv(materialSpecularLocation, texture.material.specular);
+  gl.uniform1f(materialShininessLocation, texture.material.shininess);
+
+  gl.uniform3fv(lightPositionLocation, [2.0, 2.0, 2.0]);
+  gl.uniform3fv(lightAmbientLocation, [0.2, 0.2, 0.2]);
+  gl.uniform3fv(lightDiffuseLocation, [0.8, 0.8, 0.8]);
+  gl.uniform3fv(lightSpecularLocation, [1.0, 1.0, 1.0]);
 
   function render() {
     resizeCanvas(gl.canvas);
@@ -120,7 +145,7 @@ async function main() {
     gl.bindVertexArray(object.vao);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture.diffuse);
+    gl.bindTexture(gl.TEXTURE_2D, texture.id);
     gl.uniform1i(textureLocation, 0);
 
     for (let i = 0; i < objects.length; i++) {
@@ -142,7 +167,11 @@ async function main() {
 
       mat4.scale(model, model, [scale, scale, scale]);
 
+      mat4.invert(normalMatrix, model);
+      mat4.transpose(normalMatrix, normalMatrix);
+
       gl.uniformMatrix4fv(modelLocation, false, model);
+      gl.uniformMatrix4fv(normalMatrixLocation, false, normalMatrix);
       gl.drawArrays(gl.TRIANGLES, 0, object.vertexCount);
     }
 

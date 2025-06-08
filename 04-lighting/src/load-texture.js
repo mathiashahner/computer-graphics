@@ -11,7 +11,13 @@ export async function loadMaterial(url) {
 
 function parseMaterial(mtlText) {
   const lines = mtlText.split("\n");
-  const material = {};
+  const material = {
+    ambient: [0.2, 0.2, 0.2],
+    diffuse: [0.8, 0.8, 0.8],
+    specular: [1.0, 1.0, 1.0],
+    shininess: 32.0,
+    diffuseMap: "",
+  };
 
   for (const line of lines) {
     const trimmedLine = line.trim();
@@ -21,7 +27,23 @@ function parseMaterial(mtlText) {
     const command = parts[0];
 
     switch (command) {
-      case "map_Kd": // Diffuse texture map
+      case "Ka":
+        material.ambient = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])];
+        break;
+
+      case "Kd":
+        material.diffuse = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])];
+        break;
+
+      case "Ks":
+        material.specular = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])];
+        break;
+
+      case "Ns":
+        material.shininess = parseFloat(parts[1]);
+        break;
+
+      case "map_Kd":
         material.diffuseMap = parts[1];
         break;
     }

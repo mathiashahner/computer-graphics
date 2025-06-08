@@ -45,8 +45,8 @@ export async function setupVertices(gl, objUrl = "/cube.obj") {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    // 3 for position + 2 for texture coordinates
-    const stride = 5 * Float32Array.BYTES_PER_ELEMENT;
+    // 3 for position + 2 for texture coordinates + 3 for normals
+    const stride = 8 * Float32Array.BYTES_PER_ELEMENT;
 
     // Position attribute (location 0)
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
@@ -55,6 +55,10 @@ export async function setupVertices(gl, objUrl = "/cube.obj") {
     // Texture coordinate attribute (location 1)
     gl.vertexAttribPointer(1, 2, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(1);
+
+    // Normal attribute (location 2)
+    gl.vertexAttribPointer(2, 3, gl.FLOAT, false, stride, 5 * Float32Array.BYTES_PER_ELEMENT);
+    gl.enableVertexAttribArray(2);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -73,7 +77,8 @@ export async function setupMaterial(gl, mtlUrl) {
     const basePath = mtlUrl.substring(0, mtlUrl.lastIndexOf("/") + 1);
     const textureUrl = basePath + material.diffuseMap;
 
-    loadedTexture.diffuse = await loadTexture(gl, textureUrl);
+    loadedTexture.id = await loadTexture(gl, textureUrl);
+    loadedTexture.material = material;
     return loadedTexture;
   } catch (error) {
     console.error("Error loading material textures:", error);

@@ -1,9 +1,9 @@
-# task-3
+# task-4
 
 How to run:
 
 ```bash
-cd 03-texture
+cd 04-lighting
 npm install
 npm run dev
 ```
