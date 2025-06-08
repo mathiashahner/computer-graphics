@@ -1,8 +1,8 @@
 import "./style.css";
 
 import { mat4 } from "gl-matrix";
-import { setupProgram, setupVertices } from "./setup";
 import { getDefaultObject, resizeCanvas } from "./utils";
+import { setupMaterial, setupProgram, setupVertices } from "./setup";
 
 let selectedObject = 0;
 let objects = [getDefaultObject()];
@@ -88,12 +88,14 @@ async function main() {
 
   const program = setupProgram(gl);
   const object = await setupVertices(gl, "/model.obj");
+  const texture = await setupMaterial(gl, "/model.mtl");
 
   setupKeyCallback();
 
   const modelLocation = gl.getUniformLocation(program, "model");
   const viewLocation = gl.getUniformLocation(program, "view");
   const projectionLocation = gl.getUniformLocation(program, "projection");
+  const textureLocation = gl.getUniformLocation(program, "uTexture");
 
   const model = mat4.create();
   const view = mat4.create();
@@ -116,6 +118,10 @@ async function main() {
     gl.enable(gl.DEPTH_TEST);
 
     gl.bindVertexArray(object.vao);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture.diffuse);
+    gl.uniform1i(textureLocation, 0);
 
     for (let i = 0; i < objects.length; i++) {
       const { position, rotateX, rotateY, rotateZ, scale } = objects[i];

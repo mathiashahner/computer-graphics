@@ -1,3 +1,4 @@
+import { loadMaterial, loadTexture } from "./load-texture";
 import { fragmentShaderSource, vertexShaderSource } from "./shader";
 import { createVertexData, getVertexCount, loadObject } from "./load-object";
 
@@ -44,12 +45,15 @@ export async function setupVertices(gl, objUrl = "/cube.obj") {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    const stride = 6 * Float32Array.BYTES_PER_ELEMENT;
+    // 3 for position + 2 for texture coordinates
+    const stride = 5 * Float32Array.BYTES_PER_ELEMENT;
 
+    // Position attribute (location 0)
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
     gl.enableVertexAttribArray(0);
 
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
+    // Texture coordinate attribute (location 1)
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(1);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -58,5 +62,21 @@ export async function setupVertices(gl, objUrl = "/cube.obj") {
     return { vao, vertexCount };
   } catch (error) {
     console.error("Error on vertex setup:", error);
+  }
+}
+
+export async function setupMaterial(gl, mtlUrl) {
+  try {
+    const material = await loadMaterial(mtlUrl);
+    const loadedTexture = {};
+
+    const basePath = mtlUrl.substring(0, mtlUrl.lastIndexOf("/") + 1);
+    const textureUrl = basePath + material.diffuseMap;
+
+    loadedTexture.diffuse = await loadTexture(gl, textureUrl);
+    return loadedTexture;
+  } catch (error) {
+    console.error("Error loading material textures:", error);
+    throw error;
   }
 }

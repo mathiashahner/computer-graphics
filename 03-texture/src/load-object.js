@@ -61,13 +61,15 @@ function parseObject(objectText) {
 
 export function createVertexData(objectData) {
   const vertexData = [];
-  const color = [0.25, 0.25, 0.0];
-  const { vertices, faces } = objectData;
+  const { faces, vertices, textureCoords } = objectData;
 
   for (const face of faces) {
     for (const faceVertex of face) {
       const vertex = vertices[faceVertex.vertex];
-      vertexData.push(...vertex, ...color);
+      vertexData.push(...vertex);
+
+      const texCoord = textureCoords[faceVertex.texture];
+      vertexData.push(texCoord[0], texCoord[1]);
     }
   }
 
