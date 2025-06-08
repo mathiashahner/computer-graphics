@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Texture - Mathias Hahner</title>
+  </head>
+  <body>
+    <div class="menu">
+      <h1>controls</h1>
+      <div class="line"></div>
+
+      <div class="control">
+        <h2 class="control-title">move x</h2>
+        <div class="control-keys">
+          <div class="control-key">a</div>
+          <span id="control-value-x">0.00</span>
+          <div class="control-key">d</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">move y</h2>
+        <div class="control-keys">
+          <div class="control-key">s</div>
+          <span id="control-value-y">0.00</span>
+          <div class="control-key">w</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">move z</h2>
+        <div class="control-keys">
+          <div class="control-key">q</div>
+          <span id="control-value-z">0.00</span>
+          <div class="control-key">e</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">scale</h2>
+        <div class="control-keys">
+          <div class="control-key">[</div>
+          <span id="control-value-scale">1.00</span>
+          <div class="control-key">]</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">instances</h2>
+        <div class="control-keys">
+          <div class="control-key">v</div>
+          <span id="control-value-instances">1</span>
+          <div class="control-key">^</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">selected</h2>
+        <div class="control-keys">
+          <div class="control-key">1</div>
+          <span id="control-value-selected">1</span>
+          <div class="control-key">9</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">rotate</h2>
+        <div class="control-keys">
+          <div class="control-key">x</div>
+          <div class="control-key">y</div>
+          <div class="control-key">z</div>
+        </div>
+      </div>
+
+      <div class="control">
+        <h2 class="control-title">reset</h2>
+        <div class="control-keys">
+          <div class="control-key">r</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
