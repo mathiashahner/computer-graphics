@@ -1,9 +1,9 @@
-# task-4
+# task-5
 
 How to run:
 
 ```bash
-cd 04-lighting
+cd 05-camera
 npm install
 npm run dev
 ```
