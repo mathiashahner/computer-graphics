@@ -1,16 +1,19 @@
 import "./style.css";
 
 import { mat4 } from "gl-matrix";
+import { FirstPersonCamera } from "./camera";
 import { getDefaultObject, resizeCanvas } from "./utils";
 import { setupMaterial, setupProgram, setupVertices } from "./setup";
 
 let selectedObject = 0;
 let objects = [getDefaultObject()];
+let camera = new FirstPersonCamera();
 
 function resetHandler(key) {
   if (key === "r") {
-    objects = [getDefaultObject()];
     selectedObject = 0;
+    objects = [getDefaultObject()];
+    camera = new FirstPersonCamera();
   }
 }
 
@@ -32,11 +35,11 @@ function changeRotationHandler(key) {
 function changePositionHandler(key) {
   let position = objects[selectedObject].position;
 
-  if (key === "d") position[0] += 0.05;
-  if (key === "a") position[0] -= 0.05;
+  if (key === "arrowright") position[0] += 0.05;
+  if (key === "arrowleft") position[0] -= 0.05;
 
-  if (key === "w") position[1] += 0.05;
-  if (key === "s") position[1] -= 0.05;
+  if (key === "arrowup") position[1] += 0.05;
+  if (key === "arrowdown") position[1] -= 0.05;
 
   if (key === "e") position[2] += 0.05;
   if (key === "q") position[2] -= 0.05;
@@ -50,12 +53,12 @@ function changeScaleHandler(key) {
 }
 
 function changeCountHandler(key) {
-  if (key === "arrowdown" && objects.length > 1) {
+  if (key === "-" && objects.length > 1) {
     objects.pop();
     selectedObject = Math.max(selectedObject - 1, 0);
   }
 
-  if (key === "arrowup" && objects.length < 9) {
+  if (key === "+" && objects.length < 9) {
     objects.push(getDefaultObject());
   }
 }
@@ -111,13 +114,7 @@ async function main() {
   const viewPositionLocation = gl.getUniformLocation(program, "uViewPosition");
 
   const model = mat4.create();
-  const view = mat4.create();
-  const projection = mat4.create();
   const normalMatrix = mat4.create();
-
-  mat4.lookAt(view, [0, 0, 3], [0, 0, 0], [0, 1, 0]);
-  gl.uniformMatrix4fv(viewLocation, false, view);
-  gl.uniform3fv(viewPositionLocation, [0, 0, 3]);
 
   gl.uniform3fv(materialAmbientLocation, texture.material.ambient);
   gl.uniform3fv(materialDiffuseLocation, texture.material.diffuse);
@@ -130,13 +127,18 @@ async function main() {
   gl.uniform3fv(lightSpecularLocation, [1.0, 1.0, 1.0]);
 
   function render() {
+    camera.update();
     resizeCanvas(gl.canvas);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     const aspect = gl.canvas.width / gl.canvas.height;
-    mat4.perspective(projection, Math.PI / 4, aspect, 0.1, 100.0);
+    const view = camera.getViewMatrix();
+    const projection = camera.getProjectionMatrix(aspect);
+
+    gl.uniformMatrix4fv(viewLocation, false, view);
     gl.uniformMatrix4fv(projectionLocation, false, projection);
+    gl.uniform3fv(viewPositionLocation, camera.getPosition());
 
     gl.clearColor(0.175, 0.175, 0.175, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
