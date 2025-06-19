@@ -1,3 +1,4 @@
+import { createObject, loadScene } from "./load-scene";
 import { loadMaterial, loadTexture } from "./load-texture";
 import { fragmentShaderSource, vertexShaderSource } from "./shader";
 import { createVertexData, getVertexCount, loadObject } from "./load-object";
@@ -84,4 +85,16 @@ export async function setupMaterial(gl, mtlUrl) {
     console.error("Error loading material textures:", error);
     throw error;
   }
+}
+
+export async function setupScene(gl) {
+  const scene = await loadScene("/scene.json");
+
+  const objects = scene.objects.map(async (obj) => {
+    const object = await setupVertices(gl, obj.objectPath);
+    const texture = await setupMaterial(gl, obj.materialPath);
+    return createObject(obj, object, texture);
+  });
+
+  return Promise.all(objects);
 }

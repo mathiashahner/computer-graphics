@@ -1,0 +1,14 @@
+{
+  "objects": [
+    {
+      "objectPath": "/model.obj",
+      "materialPath": "/model.mtl",
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "rotateX": false,
+      "rotateY": false,
+      "rotateZ": false,
+      "scale": 1
+    }
+  ]
+}
