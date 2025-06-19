@@ -18,10 +18,13 @@ async function resetHandler(gl, key) {
 }
 
 function changeSelectedHandler(key) {
-  if (key.match(/^[0-9]$/)) {
+  if (key.match(/^[1-9]$/)) {
     const num = parseInt(key, 10);
-    if (num > 0 && num <= objects.length) selectedObject = num - 1;
+    if (num <= objects.length) selectedObject = num - 1;
   }
+
+  if (key === "{") selectedObject = Math.max(selectedObject - 1, 0);
+  if (key === "}") selectedObject = Math.min(selectedObject + 1, objects.length - 1);
 }
 
 function changeRotationHandler(key) {
@@ -49,7 +52,7 @@ function changeScaleHandler(key) {
   let object = objects[selectedObject];
 
   if (key === "[") object.scale = Math.max(object.scale - 0.05, 0.05);
-  if (key === "]") object.scale = Math.min(object.scale + 0.05, 2);
+  if (key === "]") object.scale = Math.min(object.scale + 0.05, 10);
 }
 
 function changeCountHandler(key) {
@@ -58,8 +61,9 @@ function changeCountHandler(key) {
     selectedObject = Math.max(selectedObject - 1, 0);
   }
 
-  if (key === "+" && objects.length < 9) {
+  if (key === "+" && objects.length < 99) {
     objects.push(getDefaultObject(objects[0]));
+    selectedObject = objects.length - 1;
   }
 }
 
