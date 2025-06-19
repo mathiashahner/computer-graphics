@@ -66,7 +66,7 @@ export class FirstPersonCamera {
 
     this.canvas.addEventListener("wheel", (event) => {
       event.preventDefault();
-      this.processMouseScroll(event.deltaY);
+      this.processMouseScroll(-event.deltaY);
     });
   }
 
