@@ -119,11 +119,6 @@ async function main() {
   const model = mat4.create();
   const normalMatrix = mat4.create();
 
-  gl.uniform3fv(materialAmbientLocation, objects[0].texture.material.ambient);
-  gl.uniform3fv(materialDiffuseLocation, objects[0].texture.material.diffuse);
-  gl.uniform3fv(materialSpecularLocation, objects[0].texture.material.specular);
-  gl.uniform1f(materialShininessLocation, objects[0].texture.material.shininess);
-
   gl.uniform3fv(lightPositionLocation, [2.0, 2.0, 2.0]);
   gl.uniform3fv(lightAmbientLocation, [0.2, 0.2, 0.2]);
   gl.uniform3fv(lightDiffuseLocation, [0.8, 0.8, 0.8]);
@@ -147,14 +142,13 @@ async function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
-    gl.bindVertexArray(objects[0].vao);
-
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, objects[0].texture.id);
     gl.uniform1i(textureLocation, 0);
 
     for (let i = 0; i < objects.length; i++) {
-      const { position, rotateX, rotateY, rotateZ, scale } = objects[i];
+      const { position, rotateX, rotateY, rotateZ, scale, texture, vao, vertexCount } = objects[i];
+      const { ambient, diffuse, specular, shininess } = texture.material;
+
       const angle = performance.now() / 1000;
       let rotation = objects[i].rotation;
 
@@ -175,9 +169,17 @@ async function main() {
       mat4.invert(normalMatrix, model);
       mat4.transpose(normalMatrix, normalMatrix);
 
+      gl.uniform3fv(materialAmbientLocation, ambient);
+      gl.uniform3fv(materialDiffuseLocation, diffuse);
+      gl.uniform3fv(materialSpecularLocation, specular);
+      gl.uniform1f(materialShininessLocation, shininess);
+
       gl.uniformMatrix4fv(modelLocation, false, model);
       gl.uniformMatrix4fv(normalMatrixLocation, false, normalMatrix);
-      gl.drawArrays(gl.TRIANGLES, 0, objects[i].vertexCount);
+
+      gl.bindVertexArray(vao);
+      gl.bindTexture(gl.TEXTURE_2D, texture.id);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
     }
 
     gl.bindVertexArray(null);
