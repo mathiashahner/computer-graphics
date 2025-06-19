@@ -5,10 +5,23 @@ const defaultObject = {
   rotateY: false,
   rotateZ: false,
   scale: 1,
+  vao: null,
+  vertexCount: 0,
+  texture: {
+    id: null,
+    material: {},
+  },
 };
 
-export function getDefaultObject() {
-  return structuredClone(defaultObject);
+export function getDefaultObject(baseObject) {
+  const object = structuredClone(defaultObject);
+
+  object.vao = baseObject.vao;
+  object.vertexCount = baseObject.vertexCount;
+  object.texture.id = baseObject.texture.id;
+  object.texture.material = baseObject.texture.material;
+
+  return object;
 }
 
 export function resizeCanvas(canvas) {

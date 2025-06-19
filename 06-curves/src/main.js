@@ -2,17 +2,17 @@ import "./style.css";
 
 import { mat4 } from "gl-matrix";
 import { FirstPersonCamera } from "./camera";
+import { setupProgram, setupScene } from "./setup";
 import { getDefaultObject, resizeCanvas } from "./utils";
-import { setupMaterial, setupProgram, setupVertices } from "./setup";
 
+let objects = [];
 let selectedObject = 0;
-let objects = [getDefaultObject()];
 let camera = new FirstPersonCamera();
 
-function resetHandler(key) {
+async function resetHandler(gl, key) {
   if (key === "r") {
     selectedObject = 0;
-    objects = [getDefaultObject()];
+    objects = await setupScene(gl);
     camera = new FirstPersonCamera();
   }
 }
@@ -59,15 +59,15 @@ function changeCountHandler(key) {
   }
 
   if (key === "+" && objects.length < 9) {
-    objects.push(getDefaultObject());
+    objects.push(getDefaultObject(objects[0]));
   }
 }
 
-function setupKeyCallback() {
-  document.addEventListener("keydown", (event) => {
+function setupKeyCallback(gl) {
+  document.addEventListener("keydown", async (event) => {
     const key = event.key.toLowerCase();
 
-    resetHandler(key);
+    await resetHandler(gl, key);
     changeSelectedHandler(key);
     changeRotationHandler(key);
     changePositionHandler(key);
@@ -90,10 +90,9 @@ async function main() {
   const gl = canvas.getContext("webgl2");
 
   const program = setupProgram(gl);
-  const object = await setupVertices(gl, "/model.obj");
-  const texture = await setupMaterial(gl, "/model.mtl");
+  objects = await setupScene(gl);
 
-  setupKeyCallback();
+  setupKeyCallback(gl);
 
   const modelLocation = gl.getUniformLocation(program, "model");
   const viewLocation = gl.getUniformLocation(program, "view");
@@ -116,10 +115,10 @@ async function main() {
   const model = mat4.create();
   const normalMatrix = mat4.create();
 
-  gl.uniform3fv(materialAmbientLocation, texture.material.ambient);
-  gl.uniform3fv(materialDiffuseLocation, texture.material.diffuse);
-  gl.uniform3fv(materialSpecularLocation, texture.material.specular);
-  gl.uniform1f(materialShininessLocation, texture.material.shininess);
+  gl.uniform3fv(materialAmbientLocation, objects[0].texture.material.ambient);
+  gl.uniform3fv(materialDiffuseLocation, objects[0].texture.material.diffuse);
+  gl.uniform3fv(materialSpecularLocation, objects[0].texture.material.specular);
+  gl.uniform1f(materialShininessLocation, objects[0].texture.material.shininess);
 
   gl.uniform3fv(lightPositionLocation, [2.0, 2.0, 2.0]);
   gl.uniform3fv(lightAmbientLocation, [0.2, 0.2, 0.2]);
@@ -144,10 +143,10 @@ async function main() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
-    gl.bindVertexArray(object.vao);
+    gl.bindVertexArray(objects[0].vao);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture.id);
+    gl.bindTexture(gl.TEXTURE_2D, objects[0].texture.id);
     gl.uniform1i(textureLocation, 0);
 
     for (let i = 0; i < objects.length; i++) {
@@ -174,7 +173,7 @@ async function main() {
 
       gl.uniformMatrix4fv(modelLocation, false, model);
       gl.uniformMatrix4fv(normalMatrixLocation, false, normalMatrix);
-      gl.drawArrays(gl.TRIANGLES, 0, object.vertexCount);
+      gl.drawArrays(gl.TRIANGLES, 0, objects[i].vertexCount);
     }
 
     gl.bindVertexArray(null);
