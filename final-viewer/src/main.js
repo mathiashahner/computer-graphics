@@ -69,6 +69,17 @@ function changeCountHandler(key) {
   }
 }
 
+function updateControls() {
+  const object = objects[selectedObject];
+
+    document.getElementById("control-value-x").innerText = object.position[0].toFixed(2);
+    document.getElementById("control-value-y").innerText = object.position[1].toFixed(2);
+    document.getElementById("control-value-z").innerText = object.position[2].toFixed(2);
+    document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
+    document.getElementById("control-value-instances").innerText = objects.length;
+    document.getElementById("control-value-selected").innerText = selectedObject + 1;
+}
+
 function setupKeyCallback(gl) {
   document.addEventListener("keydown", async (event) => {
     const key = event.key.toLowerCase();
@@ -80,14 +91,7 @@ function setupKeyCallback(gl) {
     changeScaleHandler(key);
     changeCountHandler(key);
 
-    const object = objects[selectedObject];
-
-    document.getElementById("control-value-x").innerText = object.position[0].toFixed(2);
-    document.getElementById("control-value-y").innerText = object.position[1].toFixed(2);
-    document.getElementById("control-value-z").innerText = object.position[2].toFixed(2);
-    document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
-    document.getElementById("control-value-instances").innerText = objects.length;
-    document.getElementById("control-value-selected").innerText = selectedObject + 1;
+    updateControls();
   });
 }
 
@@ -121,7 +125,7 @@ async function main() {
   const model = mat4.create();
   const normalMatrix = mat4.create();
 
-  gl.uniform3fv(lightPositionLocation, [2.0, 2.0, 2.0]);
+  gl.uniform3fv(lightPositionLocation, [0.0, 0.0, -4.0]);
   gl.uniform3fv(lightAmbientLocation, [0.2, 0.2, 0.2]);
   gl.uniform3fv(lightDiffuseLocation, [0.8, 0.8, 0.8]);
   gl.uniform3fv(lightSpecularLocation, [1.0, 1.0, 1.0]);
@@ -193,6 +197,7 @@ async function main() {
 
     gl.bindVertexArray(null);
 
+    updateControls();
     requestAnimationFrame(render);
   }
 
