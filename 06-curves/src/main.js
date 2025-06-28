@@ -1,11 +1,13 @@
 import "./style.css";
 
 import { mat4 } from "gl-matrix";
+import { updatePosition } from "./bezier";
 import { FirstPersonCamera } from "./camera";
 import { setupProgram, setupScene } from "./setup";
 import { getDefaultObject, resizeCanvas } from "./utils";
 
 let objects = [];
+let lastTime = 0;
 let selectedObject = 0;
 let camera = new FirstPersonCamera();
 
@@ -55,7 +57,7 @@ function changeScaleHandler(key) {
   if (key === "]") object.scale = Math.min(object.scale + 0.05, 10);
 }
 
-function changeTrajectorySpeedHandler(key) {
+function changeSpeedHandler(key) {
   let object = objects[selectedObject];
 
   if (object.trajectoryState) {
@@ -89,7 +91,7 @@ function setupKeyCallback(gl) {
     changeRotationHandler(key);
     changePositionHandler(key);
     changeScaleHandler(key);
-    changeTrajectorySpeedHandler(key);
+    changeSpeedHandler(key);
     changeCountHandler(key);
 
     const object = objects[selectedObject];
@@ -100,8 +102,7 @@ function setupKeyCallback(gl) {
     document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
     document.getElementById("control-value-instances").innerText = objects.length;
     document.getElementById("control-value-selected").innerText = selectedObject + 1;
-
-    document.getElementById("control-value-trajectory-speed").innerText =
+    document.getElementById("control-value-speed").innerText =
       object.trajectoryState.speed.toFixed(3);
   });
 }
@@ -141,7 +142,10 @@ async function main() {
   gl.uniform3fv(lightDiffuseLocation, [0.8, 0.8, 0.8]);
   gl.uniform3fv(lightSpecularLocation, [1.0, 1.0, 1.0]);
 
-  function render() {
+  function render(currentTime) {
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+
     camera.update();
     resizeCanvas(gl.canvas);
 
@@ -163,11 +167,15 @@ async function main() {
     gl.uniform1i(textureLocation, 0);
 
     for (let i = 0; i < objects.length; i++) {
-      const { position, rotateX, rotateY, rotateZ, scale, texture, vao, vertexCount } = objects[i];
+      const object = objects[i];
+
+      if (object.trajectoryState) updatePosition(object, deltaTime);
+
+      const { position, rotateX, rotateY, rotateZ, scale, texture, vao, vertexCount } = object;
       const { ambient, diffuse, specular, shininess } = texture.material;
 
-      const angle = performance.now() / 1000;
-      let rotation = objects[i].rotation;
+      const angle = currentTime / 1000;
+      let rotation = object.rotation;
 
       mat4.identity(model);
       mat4.translate(model, model, position);

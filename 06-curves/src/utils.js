@@ -5,6 +5,8 @@ const defaultObject = {
   rotateY: false,
   rotateZ: false,
   scale: 1,
+  trajectory: [],
+  trajectoryState: null,
   vao: null,
   vertexCount: 0,
   texture: {
