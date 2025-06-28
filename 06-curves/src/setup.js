@@ -31,7 +31,7 @@ export function setupProgram(gl) {
   return program;
 }
 
-export async function setupVertices(gl, objUrl) {
+async function setupVertices(gl, objUrl) {
   try {
     const objData = await loadObject(objUrl);
     console.log("Object file loaded:", objData);
@@ -70,7 +70,7 @@ export async function setupVertices(gl, objUrl) {
   }
 }
 
-export async function setupMaterial(gl, mtlUrl) {
+async function setupMaterial(gl, mtlUrl) {
   try {
     const material = await loadMaterial(mtlUrl);
     const loadedTexture = {};

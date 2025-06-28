@@ -1,14 +1,14 @@
 {
   "objects": [
     {
-      "objectPath": "/model.obj",
-      "materialPath": "/model.mtl",
-      "position": [0, 0, 0],
-      "rotation": [0, 0, 0],
+      "objectPath": "/planet.obj",
+      "materialPath": "/earth.mtl",
+      "position": [0.2, 0.2, -5.0],
+      "rotation": [0.0, 0.0, 0.0],
       "rotateX": false,
-      "rotateY": false,
+      "rotateY": true,
       "rotateZ": false,
-      "scale": 1
+      "scale": 0.5
     }
   ]
 }

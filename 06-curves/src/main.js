@@ -55,6 +55,19 @@ function changeScaleHandler(key) {
   if (key === "]") object.scale = Math.min(object.scale + 0.05, 10);
 }
 
+function changeTrajectorySpeedHandler(key) {
+  let object = objects[selectedObject];
+
+  if (object.trajectoryState) {
+    if (key === ",") {
+      object.trajectoryState.speed = Math.max(object.trajectoryState.speed - 0.001, 0.001);
+    }
+    if (key === ".") {
+      object.trajectoryState.speed = Math.min(object.trajectoryState.speed + 0.001, 0.1);
+    }
+  }
+}
+
 function changeCountHandler(key) {
   if (key === "-" && objects.length > 1) {
     objects.pop();
@@ -76,6 +89,7 @@ function setupKeyCallback(gl) {
     changeRotationHandler(key);
     changePositionHandler(key);
     changeScaleHandler(key);
+    changeTrajectorySpeedHandler(key);
     changeCountHandler(key);
 
     const object = objects[selectedObject];
@@ -86,6 +100,9 @@ function setupKeyCallback(gl) {
     document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
     document.getElementById("control-value-instances").innerText = objects.length;
     document.getElementById("control-value-selected").innerText = selectedObject + 1;
+
+    document.getElementById("control-value-trajectory-speed").innerText =
+      object.trajectoryState.speed.toFixed(3);
   });
 }
 

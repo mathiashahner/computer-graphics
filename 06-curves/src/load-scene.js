@@ -11,6 +11,7 @@ export async function createObject(obj, object, texture) {
     rotateY: obj.rotateY,
     rotateZ: obj.rotateZ,
     scale: obj.scale,
+    trajectory: obj.trajectory,
     vao: object.vao,
     vertexCount: object.vertexCount,
     texture: {
