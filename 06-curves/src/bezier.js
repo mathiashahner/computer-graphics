@@ -38,14 +38,13 @@ function generateBezierCurve(trajectory, segments) {
   return points;
 }
 
-export function initializeState(trajectory, speed) {
+export function initializeState(trajectory) {
   const curvePoints = generateBezierCurve(trajectory, 100);
 
   return {
     curvePoints,
     currentIndex: 0,
     progress: 0,
-    speed: speed,
     totalPoints: curvePoints.length,
     isActive: true,
   };
@@ -56,7 +55,7 @@ export function updatePosition(object, deltaTime) {
 
   const state = object.trajectoryState;
 
-  state.progress += state.speed * deltaTime;
+  state.progress += object.speed * deltaTime;
 
   if (state.progress >= 1.0) state.progress = state.progress % 1.0;
 

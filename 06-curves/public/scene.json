@@ -2,13 +2,60 @@
   "objects": [
     {
       "objectPath": "/planet.obj",
-      "materialPath": "/earth.mtl",
-      "position": [0.2, 0.2, -5.0],
+      "materialPath": "/sun.mtl",
+      "position": [0.0, 0.0, -4.0],
       "rotation": [0.0, 0.0, 0.0],
       "rotateX": false,
       "rotateY": true,
       "rotateZ": false,
-      "scale": 1.0
+      "scale": 1.0,
+      "speed": 0.0001
+    },
+    {
+      "objectPath": "/planet.obj",
+      "materialPath": "/mercury.mtl",
+      "position": [3.0, 1.5, -4.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "rotateX": false,
+      "rotateY": true,
+      "rotateZ": false,
+      "scale": 0.25,
+      "speed": 0.00015,
+      "trajectory": [
+        [3.0, 1.5, -4.0],
+        [3.0, 1.5, -4.0],
+        [1.0, 0.0, -0.5],
+        [-1.5, 0.0, -0.5],
+        [-4.0, -1.5, -4.0],
+        [-4.0, -1.5, -4.0],
+        [-1.5, 0.0, -7.5],
+        [1.0, 0.0, -7.5],
+        [3.0, 1.5, -4.0],
+        [3.0, 1.5, -4.0]
+      ]
+    },
+    {
+      "objectPath": "/planet.obj",
+      "materialPath": "/earth.mtl",
+      "position": [-6.0, 1.0, -8.0],
+      "rotation": [0.0, 0.0, 0.0],
+      "rotateX": false,
+      "rotateY": true,
+      "rotateZ": false,
+      "scale": 0.4,
+      "speed": 0.0001,
+      "trajectory": [
+        [-6.0, 1.0, -8.0],
+        [-6.0, 1.0, -8.0],
+        [-2.0, 0.0, -12.0],
+        [3.0, 0.0, -8.0],
+        [7.0, -1.0, 0.0],
+        [7.0, -1.0, 0.0],
+        [3.0, 0.0, 6.0],
+        [-2.0, 0.0, 0.0],
+        [-6.0, 1.0, -8.0],
+        [-6.0, 1.0, -8.0]
+      ]
     }
   ]
 }

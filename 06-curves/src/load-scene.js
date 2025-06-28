@@ -13,6 +13,7 @@ export async function createObject(obj, object, texture) {
     rotateY: obj.rotateY,
     rotateZ: obj.rotateZ,
     scale: obj.scale,
+    speed: obj.speed,
     trajectory: obj.trajectory,
     vao: object.vao,
     vertexCount: object.vertexCount,
@@ -24,7 +25,7 @@ export async function createObject(obj, object, texture) {
   };
 
   if (obj.trajectory && obj.trajectory.length >= 4)
-    createdObject.trajectoryState = initializeState(obj.trajectory, 0.0001);
+    createdObject.trajectoryState = initializeState(obj.trajectory);
 
   return createdObject;
 }
