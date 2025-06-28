@@ -1,11 +1,13 @@
+import { initializeState } from "./bezier.js";
+
 export async function loadScene(sceneUrl) {
   const scene = await fetch(sceneUrl);
   return await scene.json();
 }
 
 export async function createObject(obj, object, texture) {
-  return {
-    position: obj.position,
+  const createdObject = {
+    position: [...obj.position],
     rotation: obj.rotation,
     rotateX: obj.rotateX,
     rotateY: obj.rotateY,
@@ -18,5 +20,11 @@ export async function createObject(obj, object, texture) {
       id: texture.id,
       material: texture.material,
     },
+    trajectoryState: null,
   };
+
+  if (obj.trajectory && obj.trajectory.length >= 4)
+    createdObject.trajectoryState = initializeState(obj.trajectory, 0.0001);
+
+  return createdObject;
 }
