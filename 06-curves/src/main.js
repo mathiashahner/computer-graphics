@@ -102,8 +102,10 @@ function setupKeyCallback(gl) {
     document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
     document.getElementById("control-value-instances").innerText = objects.length;
     document.getElementById("control-value-selected").innerText = selectedObject + 1;
-    document.getElementById("control-value-speed").innerText =
-      object.trajectoryState.speed.toFixed(3);
+
+    if (object.trajectoryState)
+      document.getElementById("control-value-speed").innerText =
+        object.trajectoryState.speed.toFixed(3);
   });
 }
 
