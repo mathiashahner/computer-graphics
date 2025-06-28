@@ -57,19 +57,6 @@ function changeScaleHandler(key) {
   if (key === "]") object.scale = Math.min(object.scale + 0.05, 10);
 }
 
-function changeSpeedHandler(key) {
-  let object = objects[selectedObject];
-
-  if (object.trajectoryState) {
-    if (key === ",") {
-      object.trajectoryState.speed = Math.max(object.trajectoryState.speed - 0.001, 0.001);
-    }
-    if (key === ".") {
-      object.trajectoryState.speed = Math.min(object.trajectoryState.speed + 0.001, 0.1);
-    }
-  }
-}
-
 function changeCountHandler(key) {
   if (key === "-" && objects.length > 1) {
     objects.pop();
@@ -91,7 +78,6 @@ function setupKeyCallback(gl) {
     changeRotationHandler(key);
     changePositionHandler(key);
     changeScaleHandler(key);
-    changeSpeedHandler(key);
     changeCountHandler(key);
 
     const object = objects[selectedObject];
@@ -102,10 +88,6 @@ function setupKeyCallback(gl) {
     document.getElementById("control-value-scale").innerText = object.scale.toFixed(2);
     document.getElementById("control-value-instances").innerText = objects.length;
     document.getElementById("control-value-selected").innerText = selectedObject + 1;
-
-    if (object.trajectoryState)
-      document.getElementById("control-value-speed").innerText =
-        object.trajectoryState.speed.toFixed(3);
   });
 }
 
@@ -161,7 +143,7 @@ async function main() {
     gl.uniformMatrix4fv(projectionLocation, false, projection);
     gl.uniform3fv(viewPositionLocation, camera.getPosition());
 
-    gl.clearColor(0.175, 0.175, 0.175, 1.0);
+    gl.clearColor(0.05, 0.05, 0.05, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
 
